@@ -105,7 +105,7 @@ def parse_args():
                       help='The static library path of libchromiumcontent.')
   parser.add_argument('--defines', default='',
                       help='The build variables passed to gyp')
-  parser.add_argument('--libchromiumcontent_commit',
+  parser.add_argument('-c', --libchromiumcontent_commit',
                       help='The commit from which to download '
                       'libchromiumcontent',
                       default=LIBCHROMIUMCONTENT_COMMIT,
