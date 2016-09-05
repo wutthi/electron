@@ -56,7 +56,7 @@ def main():
 
   setup_python_libs()
   update_node_modules('.')
-  bootstrap_brightray(args.dev, args.url, args.target_arch,
+  bootstrap_brightray(args.dev, args.url, args.target_arch, args.libchromiumcontent_commit,
                       libcc_source_path, libcc_shared_library_path,
                       libcc_static_library_path)
 
@@ -105,6 +105,11 @@ def parse_args():
                       help='The static library path of libchromiumcontent.')
   parser.add_argument('--defines', default='',
                       help='The build variables passed to gyp')
+  parser.add_argument('--libchromiumcontent_commit',
+                      help='The commit from which to download '
+                      'libchromiumcontent',
+                      default=LIBCHROMIUMCONTENT_COMMIT,
+                      required=False)
   return parser.parse_args()
 
 
@@ -137,12 +142,12 @@ def setup_python_libs():
       execute_stdout([sys.executable, 'setup.py', 'build'])
 
 
-def bootstrap_brightray(is_dev, url, target_arch, libcc_source_path,
+def bootstrap_brightray(is_dev, url, target_arch, libchromiumcontent_commit, libcc_source_path,
                         libcc_shared_library_path,
                         libcc_static_library_path):
   bootstrap = os.path.join(VENDOR_DIR, 'brightray', 'script', 'bootstrap')
   args = [
-    '--commit', LIBCHROMIUMCONTENT_COMMIT,
+    '--commit', libchromiumcontent_commit,
     '--target_arch', target_arch,
     url
   ]
