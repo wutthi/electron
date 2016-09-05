@@ -122,7 +122,7 @@ void AtomMainDelegate::PreSandboxStartup() {
     return;
 
   // Disable renderer sandbox for most of node's functions.
-  command_line->AppendSwitch(switches::kNoSandbox);
+  //command_line->AppendSwitch(switches::kNoSandbox);
 
   // Allow file:// URIs to read other file:// URIs by default.
   command_line->AppendSwitch(switches::kAllowFileAccessFromFiles);

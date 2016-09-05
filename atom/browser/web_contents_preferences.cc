@@ -25,6 +25,9 @@
 #include "ui/gfx/switches.h"
 #endif
 
+#include <Shlwapi.h>
+#include <Shlobj.h>
+
 DEFINE_WEB_CONTENTS_USER_DATA_KEY(atom::WebContentsPreferences);
 
 namespace atom {
@@ -96,6 +99,28 @@ void WebContentsPreferences::AppendExtraCommandLineSwitches(
   web_preferences.GetBoolean(options::kNodeIntegration, &node_integration);
   command_line->AppendSwitchASCII(switches::kNodeIntegration,
                                   node_integration ? "true" : "false");
+
+  command_line->AppendSwitchASCII("registry-keys", "HKEY_USERS;HKEY_LOCAL_MACHINE;HKEY_LOCAL_MACHINE\\System;HKEY_LOCAL_MACHINE\\System\\CurrentControlSet\\Services\\Tcpip\\Parameters");
+
+  char cBinPath[_MAX_PATH + 1];
+  ::GetModuleFileNameA(NULL, cBinPath, _MAX_PATH);
+  ::PathRemoveFileSpecA(cBinPath);
+
+  std::string cFolders = "\\??\\MountPointManager;";
+  cFolders += cBinPath;
+  cFolders += "\\*;";
+  cFolders += cBinPath;
+  cFolders += "\\resources\\*;";
+
+  // Electron cache is in %APPDATA%
+  char cDirPathName[_MAX_PATH] = { 0 };
+  if (SUCCEEDED(::SHGetFolderPathA(0, CSIDL_APPDATA, 0, SHGFP_TYPE_CURRENT, cDirPathName)))
+  {
+	  cFolders += cDirPathName;
+	  cFolders += "\\*;";
+  }
+
+  command_line->AppendSwitchASCII("folders", cFolders);
 
   // The preload script.
   base::FilePath::StringType preload;
