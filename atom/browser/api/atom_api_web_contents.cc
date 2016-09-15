@@ -400,11 +400,12 @@ bool WebContents::AddMessageToConsole(content::WebContents* source,
 
 void WebContents::OnCreateWindow(const GURL& target_url,
                                  const std::string& frame_name,
-                                 WindowOpenDisposition disposition) {
+                                 WindowOpenDisposition disposition,
+								 const std::vector<base::string16>& features) {
   if (type_ == BROWSER_WINDOW || type_ == OFF_SCREEN)
-    Emit("-new-window", target_url, frame_name, disposition);
+    Emit("-new-window", target_url, frame_name, disposition, features);
   else
-    Emit("new-window", target_url, frame_name, disposition);
+    Emit("new-window", target_url, frame_name, disposition, features);
 }
 
 content::WebContents* WebContents::OpenURLFromTab(
