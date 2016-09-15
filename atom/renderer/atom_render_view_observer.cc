@@ -59,34 +59,6 @@ std::vector<v8::Local<v8::Value>> ListValueToVector(
   return result;
 }
 
-void EmitIPCEvent(blink::WebFrame* frame,
-                  const base::string16& channel,
-                  const base::ListValue& args) {
-  if (!frame || frame->isWebRemoteFrame())
-    return;
-
-  v8::Isolate* isolate = blink::mainThreadIsolate();
-  v8::HandleScope handle_scope(isolate);
-
-  v8::Local<v8::Context> context = frame->mainWorldScriptContext();
-  v8::Context::Scope context_scope(context);
-
-  // Only emit IPC event for context with node integration.
-  node::Environment* env = node::Environment::GetCurrent(context);
-  if (!env)
-    return;
-
-  v8::Local<v8::Object> ipc;
-  if (GetIPCObject(isolate, context, &ipc)) {
-    auto args_vector = ListValueToVector(isolate, args);
-    // Insert the Event object, event.sender is ipc.
-    mate::Dictionary event = mate::Dictionary::CreateEmpty(isolate);
-    event.Set("sender", ipc);
-    args_vector.insert(args_vector.begin(), event.GetHandle());
-    mate::EmitEvent(isolate, ipc, channel, args_vector);
-  }
-}
-
 base::StringPiece NetResourceProvider(int key) {
   if (key == IDR_DIR_HEADER_HTML) {
     base::StringPiece html_data =
@@ -110,6 +82,34 @@ AtomRenderViewObserver::AtomRenderViewObserver(
 }
 
 AtomRenderViewObserver::~AtomRenderViewObserver() {
+}
+
+void AtomRenderViewObserver::EmitIPCEvent(blink::WebFrame* frame,
+                                          const base::string16& channel,
+                                          const base::ListValue& args) {
+  if (!frame || frame->isWebRemoteFrame())
+    return;
+
+  v8::Isolate* isolate = blink::mainThreadIsolate();
+  v8::HandleScope handle_scope(isolate);
+
+  v8::Local<v8::Context> context = frame->mainWorldScriptContext();
+  v8::Context::Scope context_scope(context);
+
+  // Only emit IPC event for context with node integration.
+  node::Environment* env = node::Environment::GetCurrent(context);
+  if (!env)
+    return;
+
+  v8::Local<v8::Object> ipc;
+  if (GetIPCObject(isolate, context, &ipc)) {
+    auto args_vector = ListValueToVector(isolate, args);
+    // Insert the Event object, event.sender is ipc.
+    mate::Dictionary event = mate::Dictionary::CreateEmpty(isolate);
+    event.Set("sender", ipc);
+    args_vector.insert(args_vector.begin(), event.GetHandle());
+    mate::EmitEvent(isolate, ipc, channel, args_vector);
+  }
 }
 
 void AtomRenderViewObserver::DidCreateDocumentElement(

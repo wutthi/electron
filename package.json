@@ -3,6 +3,7 @@
   "version": "1.3.5",
   "devDependencies": {
     "asar": "^0.11.0",
+    "browserify": "^13.1.0",
     "electabul": "~0.0.4",
     "request": "*",
     "standard": "^7.1.2",
@@ -24,6 +25,7 @@
   "private": true,
   "scripts": {
     "bootstrap": "python ./script/bootstrap.py",
+    "browserify": "browserify",
     "build": "python ./script/build.py -c D",
     "clean": "python ./script/clean.py",
     "coverage": "npm run instrument-code-coverage && npm test -- --use-instrumented-asar",

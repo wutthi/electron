@@ -100,7 +100,13 @@ void WebContentsPreferences::AppendExtraCommandLineSwitches(
   command_line->AppendSwitchASCII(switches::kNodeIntegration,
                                   node_integration ? "true" : "false");
 
-  command_line->AppendSwitchASCII("registry-keys", "HKEY_USERS;HKEY_LOCAL_MACHINE;HKEY_LOCAL_MACHINE\\System;HKEY_LOCAL_MACHINE\\System\\CurrentControlSet\\Services\\Tcpip\\Parameters");
+  // If the `sandbox` option was passed to the BrowserWindow's webPreferences,
+  // pass `--enable-sandbox` to the renderer so it won't have any node.js
+  // integration.
+  if (IsSandboxed(web_contents))
+    command_line->AppendSwitch(switches::kEnableSandbox);
+
+  command_line->AppendSwitchASCII("registry-keys", "HKEY_USERS;HKEY_LOCAL_MACHINE;HKEY_LOCAL_MACHINE\\System;HKEY_LOCAL_MACHINE\\System\\CurrentControlSet\\Services\\Tcpip\\Parameters;HKEY_LOCAL_MACHINE\\System\\CurrentControlSet\\Services\\WinSock2\\Parameters");
 
   char cBinPath[_MAX_PATH + 1];
   ::GetModuleFileNameA(NULL, cBinPath, _MAX_PATH);
@@ -217,6 +223,21 @@ void WebContentsPreferences::AppendExtraCommandLineSwitches(
   bool offscreen;
   if (web_preferences.GetBoolean("offscreen", &offscreen) && offscreen)
     command_line->AppendSwitch(cc::switches::kEnableBeginFrameScheduling);
+}
+
+bool WebContentsPreferences::IsSandboxed(content::WebContents* web_contents) {
+  WebContentsPreferences* self;
+  if (!web_contents)
+    return false;
+
+  self = FromWebContents(web_contents);
+  if (!self)
+    return false;
+
+  base::DictionaryValue& web_preferences = self->web_preferences_;
+  bool sandboxed = false;
+  web_preferences.GetBoolean("sandboxed", &sandboxed);
+  return sandboxed;
 }
 
 // static
